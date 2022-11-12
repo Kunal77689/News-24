@@ -3,21 +3,48 @@ import NewsItem from "./NewsItem";
 
 export class News extends Component {
   articles = [];
+
   constructor() {
     super();
     this.state = {
       articles: this.articles,
       loadng: false,
+      page: 1,
     };
   }
 
   async componentDidMount() {
     let url =
-      "https://newsapi.org/v2/top-headlines?country=us&apiKey=eeab31c9930349a6b2a975b0ded7ba55";
+      "https://newsapi.org/v2/top-headlines?country=us&apiKey=eeab31c9930349a6b2a975b0ded7ba55&page=1&pageSize=20";
     let data = await fetch(url);
     let parsedData = await data.json();
-    this.setState({ articles: parsedData.articles });
+    this.setState({
+      articles: parsedData.articles,
+      totalResults: parsedData.totalResults,
+    });
   }
+  nextClick = async () => {
+    if (Math.ceil(this.state.page > this.state.totalResults / 20)) {
+    } else {
+      let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=eeab31c9930349a6b2a975b0ded7ba55&page=${
+        this.state.page + 1
+      }&pageSize=20`;
+      let data = await fetch(url);
+      let parsedData = await data.json();
+      this.setState({
+        articles: parsedData.articles,
+        page: this.state.page + 1,
+      });
+    }
+  };
+  previousClick = async () => {
+    let url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=eeab31c9930349a6b2a975b0ded7ba55&page=${
+      this.state.page - 1
+    }&pageSize=20`;
+    let data = await fetch(url);
+    let parsedData = await data.json();
+    this.setState({ articles: parsedData.articles, page: this.state.page - 1 });
+  };
   render() {
     return (
       <div>
@@ -38,7 +65,7 @@ export class News extends Component {
                     }
                     imageUrl={
                       element.urlToImage === null
-                        ? "https://www.google.com/url?sa=i&url=https%3A%2F%2Fmobile.twitter.com%2Fbreakingnews&psig=AOvVaw1pdkMu0VkJqinmXCKkcm4S&ust=1667690912703000&source=images&cd=vfe&ved=0CA0QjRxqFwoTCOC5-fXWlfsCFQAAAAAdAAAAABAE"
+                        ? "https://media.istockphoto.com/id/1264074047/vector/breaking-news-background.jpg?s=612x612&w=0&k=20&c=C5BryvaM-X1IiQtdyswR3HskyIZCqvNRojrCRLoTN0Q="
                         : element.urlToImage
                     }
                     newsUrl={element.url}
@@ -46,6 +73,23 @@ export class News extends Component {
                 </div>
               );
             })}
+          </div>
+          <div className="d-flex justify-content-between my-3">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={this.previousClick}
+              disabled={this.state.page <= 1}
+            >
+              &larr; Previous
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={this.nextClick}
+            >
+              Next &rarr;
+            </button>
           </div>
         </div>
       </div>
